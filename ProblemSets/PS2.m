@@ -131,3 +131,49 @@ plot(EEE);
 
 %It works!
 
+
+
+%% Question 4
+
+%Starting with u(SS)/(1-beta) as it is a good guess
+Value = zeros(500, 7) + ((SteadyState^alpha - delta*SteadyState)^(1-mu)-1)/((1-mu)*(1-beta));
+NewValue = Value;
+error = 100;
+tol = 10e-6;
+iter = 0;
+
+
+
+tic
+while error > tol
+    if iter<100
+        for i=1:500
+            for j=1:7
+                PossibleNewValues = UtilityMatrix(:, i, j) + ...
+                    beta.*Value*MarkovMatrix(j,:)';
+                NewValue(i,j) = max(PossibleNewValues,[],'all');
+            end
+        end
+    else
+        if mod(iter,10)==0
+            for i=1:500
+                for j=1:7
+                    PossibleNewValues = UtilityMatrix(:, i, j) + ...
+                        beta.*Value*MarkovMatrix(j,:)';
+                    [NewValue(i,j), Index(i, j)]= max(PossibleNewValues,[],'all');
+                end
+            end     
+        else
+            for i=1:500
+                for j=1:7
+                    NewValue(i,j) = UtilityMatrix(Index(i, j), i, j) + beta.*Value(Index(i, j),:)*MarkovMatrix(j,:)';
+                end
+            end 
+        end
+    end
+    display(error)
+    error = max(abs(Value - NewValue),[],'all');
+    Value = NewValue;
+    iter = iter+1;
+end
+toc
