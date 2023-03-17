@@ -66,13 +66,13 @@ while error > tol
             for j=1:7
             PossibleNewValues = UtilityMatrix(:, i, j) + ...
                 beta.*Value*MarkovMatrix(j,:)';
-            [NewValue(i,j), ChoiceGivenState(j)] = max(PossibleNewValues,[],'all');
+            [NewValue(i,j), ChoiceGivenState(j)] = max(PossibleNewValues,[],'all',"linear");
             end
         else   
             for j=1:7
             PossibleNewValues = UtilityMatrix(ChoiceGivenState(j):500, i, j) + ...
                 beta.*Value(ChoiceGivenState(j):500, :)*MarkovMatrix(j,:)';
-            [NewValue(i,j), ChoiceGivenState(j)] = max(PossibleNewValues,[],'all');
+            [NewValue(i,j), ChoiceGivenState(j)] = max(PossibleNewValues,[],'all',"linear");
             end
         end
     end
@@ -98,7 +98,7 @@ for i=1:500
     for j=1:7
         PossibleValues = UtilityMatrix(:, i, j) + ...
                 beta.*Value*MarkovMatrix(j,:)';
-        [~, Index(i, j)] = max(PossibleValues,[],'all');
+        [~, Index(i, j)] = max(PossibleValues,[],'all',"linear");
         Choice(i,j) = StockGrid(Index(i, j));
     end
 end
@@ -146,12 +146,12 @@ iter = 0;
 
 tic
 while error > tol
-    if iter<100
+    if iter<50
         for i=1:500
             for j=1:7
                 PossibleNewValues = UtilityMatrix(:, i, j) + ...
                     beta.*Value*MarkovMatrix(j,:)';
-                NewValue(i,j) = max(PossibleNewValues,[],'all');
+                NewValue(i,j) = max(PossibleNewValues,[],'all',"linear");
             end
         end
     else
@@ -160,7 +160,7 @@ while error > tol
                 for j=1:7
                     PossibleNewValues = UtilityMatrix(:, i, j) + ...
                         beta.*Value*MarkovMatrix(j,:)';
-                    [NewValue(i,j), Index(i, j)]= max(PossibleNewValues,[],'all');
+                    [NewValue(i,j), Index(i, j)]= max(PossibleNewValues,[],'all',"linear");
                 end
             end     
         else
@@ -171,9 +171,31 @@ while error > tol
             end 
         end
     end
-    display(error)
-    error = max(abs(Value - NewValue),[],'all');
+    error = max(abs(Value - NewValue),[],'all',"linear");
     Value = NewValue;
     iter = iter+1;
 end
+toc
+
+%% Question 5
+
+tic
+
+Value100 = HowardVFI([.987, 1/.987-1, 2, 1/3, .012, .95, .007], 100, 7);
+
+grid100 = linspace(.75*SteadyState, 1.25*SteadyState, 100);
+grid500 = linspace(.75*SteadyState, 1.25*SteadyState, 500);
+
+Interpolated500 = interp1(grid100, Value100, grid500);
+Value500 = HowardVFI([.987, 1/.987-1, 2, 1/3, .012, .95, .007], 500, 7, Interpolated500);
+
+grid5000 = linspace(.75*SteadyState, 1.25*SteadyState, 5000);
+
+Interpolated5000 = interp1(grid100, Value100, grid5000);
+Value5000 = HowardVFI([.987, 1/.987-1, 2, 1/3, .012, .95, .007], 5000, 7, Interpolated5000);
+
+toc
+
+tic
+Value5000 = HowardVFI([.987, 1/.987-1, 2, 1/3, .012, .95, .007], 5000, 7);
 toc
