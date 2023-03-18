@@ -1,34 +1,30 @@
-function [Value] = HowardVFI(param,KGridN,ZGridN, StartingGuess)
-    beta = param(1);
-    zeta = param(2);
-    mu = param(3);
-    alpha = param(4);
-    delta = param(5);
-    rho = param(6);
-    sigma = param(7);
+function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, r, AGridN, ZGridN, StartingGuess)
     
+    beta = param(1);
+    gamma = param(2);
+    rho = param(3);
+    sigma = param(4);
+    
+    
+
     [ShockGrid, MarkovMatrix] = TauchenDiscretizer(ZGridN, 3, 0, rho, sigma);
     
-    SteadyState = ((zeta+delta)/alpha)^(1/(alpha-1));
-    StockGrid = linspace(.75*SteadyState, 1.25*SteadyState, KGridN);
-    [KGrid, KNewGrid, TFPGrid] = meshgrid(StockGrid, StockGrid, exp(ShockGrid));
+    phi = (exp(ShockGrid(1))/(1-beta)); 
 
-    UtilityMatrix = ((TFPGrid.*KGrid.^alpha + (1-delta).*KGrid - KNewGrid).^(1-mu)-1)./(1-mu);
-    UtilityMatrix(TFPGrid.*KGrid.^alpha + (1-delta).*KGrid - KNewGrid <=0 ) = -inf;
-    
-    
-    % Starting guess; if not given then start with K_ss
-    
+    AssetGrid = linspace(-phi, phi, AGridN);
+    [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid, AssetGrid, exp(ShockGrid));
+
+    UtilityMatrix = ((exp(TFPGrid) + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
+    UtilityMatrix(exp(TFPGrid) + (1+r).*AGrid - ANewGrid <=0 ) = -inf;
+
     if ~exist('StartingGuess','var')
-         %Starting with u(SS)/(1-beta) as it is a good guess
-        Value = zeros(KGridN, ZGridN) + ...
-            ((SteadyState^alpha - delta*SteadyState)^(1-mu)-1)/((1-mu)*(1-beta));
+        Value = zeros(AGridN, ZGridN);
     else
         Value = StartingGuess;
     end
+
     
-    
-    
+
     NewValue = Value;
     error = 100;
     tol = 10e-6;
@@ -39,7 +35,7 @@ function [Value] = HowardVFI(param,KGridN,ZGridN, StartingGuess)
     
     while error > tol
         if iter<50
-            for i=1:KGridN
+            for i=1:AGridN
                 for j=1:ZGridN
                     PossibleNewValues = UtilityMatrix(:, i, j) + ...
                         beta.*Value*MarkovMatrix(j,:)';
@@ -48,7 +44,7 @@ function [Value] = HowardVFI(param,KGridN,ZGridN, StartingGuess)
             end
         else
             if mod(iter,10)==0
-                for i=1:KGridN
+                for i=1:AGridN
                     for j=1:ZGridN
                         PossibleNewValues = UtilityMatrix(:, i, j) + ...
                             beta.*Value*MarkovMatrix(j,:)';
@@ -56,7 +52,7 @@ function [Value] = HowardVFI(param,KGridN,ZGridN, StartingGuess)
                     end
                 end     
             else
-                for i=1:KGridN
+                for i=1:AGridN
                     for j=1:ZGridN
                         NewValue(i,j) = UtilityMatrix(Index(i, j), i, j) + ...
                             beta.*Value(Index(i, j),:)*MarkovMatrix(j,:)';
@@ -68,8 +64,5 @@ function [Value] = HowardVFI(param,KGridN,ZGridN, StartingGuess)
         Value = NewValue;
         iter = iter+1;
     end
-    
-
-
 end
 
