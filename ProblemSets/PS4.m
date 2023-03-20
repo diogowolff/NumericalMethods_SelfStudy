@@ -26,4 +26,4 @@ for i=2:100
     disp(i)
 end
 
-test5 = EigenInvariantDist(test2, MarkovMatrix);
+test7 = HuggettEquilibrium([.96, 1.0001, .9, .01], 1000, 9);

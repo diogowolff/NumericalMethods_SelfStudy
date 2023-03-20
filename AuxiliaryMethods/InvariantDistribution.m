@@ -17,7 +17,7 @@ function [InitialGuess] = InvariantDistribution(PolicyIndex, MarkovMatrix)
         end
         
         error = max(abs(InitialGuess - NextGuess),[],'all',"linear");
-        disp(error);
+        %disp(error);
         InitialGuess = NextGuess;
         iter = iter+1;
     end

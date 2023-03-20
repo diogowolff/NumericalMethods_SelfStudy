@@ -19,17 +19,17 @@ function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
 
         [Policy, Index] = PolicyHuggett(beta, Value, AssetGrid,ZGridN,UtilityMatrix,MarkovMatrix);
     
-        Distribution = EigenInvariantDist(Index, MarkovMatrix);
+        Distribution = InvariantDistribution(Index, MarkovMatrix);
     
-        AssetDemand = sum(reshape(Policy, numel(Policy), 1).*Distribution, "all");
+        AssetDemand = sum(Policy.*Distribution, "all");
         
         if AssetDemand>0
-            RLowerBound = r;
-        else
             RUpperBound = r;
+        else
+            RLowerBound = r;
         end
 
-        error = abs(RUpperBound - RLowerBound);
+        error = abs(r);
         display([AssetDemand, RLowerBound, RUpperBound]);
         iter = iter+1;
     end

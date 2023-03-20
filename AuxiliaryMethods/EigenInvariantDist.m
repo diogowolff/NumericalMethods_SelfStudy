@@ -1,4 +1,4 @@
-function [V] = EigenInvariantDist(PolicyIndex, MarkovMatrix)
+function [mu] = EigenInvariantDist(PolicyIndex, MarkovMatrix)
     TransitionMatrix = zeros(numel(PolicyIndex), numel(PolicyIndex));
     SizeAGrid = size(PolicyIndex, 1);
 
@@ -9,6 +9,6 @@ function [V] = EigenInvariantDist(PolicyIndex, MarkovMatrix)
             :) = kron(MarkovMatrix(i,:), Aux);
     end
     
-    [V] = eigs(TransitionMatrix, 1);
+    mu = (eye(size(TransitionMatrix, 1)) - TransitionMatrix + ones(size(TransitionMatrix)))\ones(size(TransitionMatrix, 1),1);
 end
 

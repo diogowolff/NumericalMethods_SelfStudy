@@ -13,3 +13,4 @@ function [AssetDemand, Distribution] = AssetDemandFunction(r, Value, Distributio
     AssetDemand = sum(Policy.*Distribution, "all");
 end
 
+mu = (eye(size(TransitionMatrix, 1)) - TransitionMatrix + ones(size(TransitionMatrix)))\ones(size(TransitionMatrix), 1);
