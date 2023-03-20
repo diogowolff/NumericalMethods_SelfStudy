@@ -1,8 +1,8 @@
 function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
     beta = param(1);
 
-    RLowerBound = .04;
-    RUpperBound = .05;
+    RLowerBound = .0;
+    RUpperBound = 1/beta-1;
     
     error = 1;
     tol = 10e-6;
@@ -12,16 +12,16 @@ function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
         r = (RLowerBound + RUpperBound)/2;
         
         if iter>0
-            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, r, AGridN, ZGridN, Value);
+            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(param, r, AGridN, ZGridN, Value);
         else
-            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, r, AGridN, ZGridN);
+            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(param, r, AGridN, ZGridN);
         end
 
         [Policy, Index] = PolicyHuggett(beta, Value, AssetGrid,ZGridN,UtilityMatrix,MarkovMatrix);
     
-        Distribution = InvariantDistribution(Index, MarkovMatrix);
+        Distribution = EigenInvariantDist(Index, MarkovMatrix);
     
-        AssetDemand = sum(Policy.*Distribution, "all");
+        AssetDemand = sum(reshape(Policy, numel(Policy), 1).*Distribution, "all");
         
         if AssetDemand>0
             RLowerBound = r;

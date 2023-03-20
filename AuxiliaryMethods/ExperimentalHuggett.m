@@ -14,8 +14,8 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(p
     AssetGrid = linspace(-phi, phi, AGridN);
     [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid, AssetGrid, exp(ShockGrid));
 
-    UtilityMatrix = ((exp(TFPGrid) + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
-    UtilityMatrix(exp(TFPGrid) + (1+r).*AGrid - ANewGrid <=0 ) = -inf;
+    UtilityMatrix = ((TFPGrid + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
+    UtilityMatrix(TFPGrid + (1+r).*AGrid - ANewGrid <=0 ) = -inf;
 
     if ~exist('StartingGuess','var')
         Value = zeros(AGridN, ZGridN);
@@ -35,14 +35,13 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(p
     
     while error > tol
         if iter<50
-            NewValue = UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,100]),[1,3,2]);
+            NewValue = reshape(max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1), AGridN, 9);
         else
             if mod(iter,10)==0
-                [NewValue, Index] = max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,100]),[1,3,2]), [], 1);
-                NewValue = reshape(NewValue, 100, 9);
-                Index = reshape(Index, 100, 9);
+                [NewValue, Index] = max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1);
+                NewValue = reshape(NewValue, AGridN, 9);
+                Index = reshape(Index, AGridN, 9);
             else
-                NewValue = reshape(max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,100]),[1,3,2]), [], 2),100,9);
                 for i=1:AGridN
                     for j=1:ZGridN
                         NewValue(i,j) = UtilityMatrix(Index(i, j), i, j) + ...

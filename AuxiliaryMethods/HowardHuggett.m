@@ -9,13 +9,13 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, 
 
     [ShockGrid, MarkovMatrix] = TauchenDiscretizer(ZGridN, 3, 0, rho, sigma);
     
-    phi = (exp(ShockGrid(1))/(1-beta)); 
+    phi = (exp(ShockGrid(1))*beta/(1-beta)); 
 
     AssetGrid = linspace(-phi, phi, AGridN);
-    [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid, AssetGrid, exp(ShockGrid));
+    [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid', AssetGrid', exp(ShockGrid));
 
-    UtilityMatrix = ((exp(TFPGrid) + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
-    UtilityMatrix(exp(TFPGrid) + (1+r).*AGrid - ANewGrid <=0 ) = -inf;
+    UtilityMatrix = ((TFPGrid + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
+    UtilityMatrix(TFPGrid + (1+r).*AGrid - ANewGrid <=0 ) = -inf;
 
     if ~exist('StartingGuess','var')
         Value = zeros(AGridN, ZGridN);

@@ -11,16 +11,19 @@ sigma = .01;
 
 %% item b)
 
-[Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett([.96, 1.0001, .9, .01], .05, 1000, 9);
+[Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett([.96, 1.0001, .9, .01], 999*(1/beta - 1)/1000, 1000, 9);
 
 %% item c)
 
 [test, test2] = PolicyHuggett(.96, Value, AssetGrid, 9, UtilityMatrix, MarkovMatrix);
-[test4, test5, test6] = InvariantDistribution(test2, MarkovMatrix);
+test4 = InvariantDistribution(test2, MarkovMatrix);
+test5 = EigenInvariantDist(test2, MarkovMatrix);
 
- = HuggettEquilibrium([.96, 1.0001, .9, .01], 500, 9);
-
-plot(test6)
-for i=1:500
-    test7(i) = AssetDemandFunction(i/2000, Value);
+space = linspace(0, 1/beta-1, 100);
+[test7(1), dist] = AssetDemandFunction(0, Value);
+for i=2:100
+    [test7(i), dist] = AssetDemandFunction(space(i), Value, dist);
+    disp(i)
 end
+
+test5 = EigenInvariantDist(test2, MarkovMatrix);
