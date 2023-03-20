@@ -8,7 +8,7 @@ function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
     tol = 10e-6;
     iter = 0;
 
-    while error >= tol & iter < 500
+    while error >= tol & iter < 50
         r = (RLowerBound + RUpperBound)/2;
         
         if iter>0

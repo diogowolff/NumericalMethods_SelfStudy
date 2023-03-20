@@ -17,7 +17,7 @@ sigma = .01;
 
 [test, test2] = PolicyHuggett(.96, Value, AssetGrid, 9, UtilityMatrix, MarkovMatrix);
 test4 = InvariantDistribution(test2, MarkovMatrix);
-test5 = EigenInvariantDist(test2, MarkovMatrix);
+[test5] = EigenInvariantDist(test2, MarkovMatrix);
 
 space = linspace(0, 1/beta-1, 100);
 [test7(1), dist] = AssetDemandFunction(0, Value);
