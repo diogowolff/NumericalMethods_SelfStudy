@@ -12,7 +12,7 @@ function [r, Value, Policy] = LSEquilibrium(param, AGridN, ZGridN, bound)
         r = (RLowerBound + RUpperBound)/2;
         
         if iter>0
-            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = LSHuggett(param, r, AGridN, ZGridN, Value, bound);
+            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = LSHuggett(param, r, AGridN, ZGridN, bound, Value);
         else
             [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = LSHuggett(param, r, AGridN, ZGridN, bound);
         end

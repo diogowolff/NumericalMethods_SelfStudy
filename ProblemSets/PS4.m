@@ -91,7 +91,7 @@ legend('Original model', 'Model with higher variance',...
 
 Value3 = LSHuggett([.96, 3, .2, .4], .026, 500, 7, 3);
 
-EarPlotGrid3 = linspace(-0.01, 1/beta-1, 20);
+EarPlotGrid3 = linspace(-0.01, .041, 20);
 for i=1:20
     graph3(i) = LSDemand(EarPlotGrid3(i), Value3, [.96, 3, .2, .4], 3);
     disp(i)
@@ -101,10 +101,28 @@ end
 
 Value6 = LSHuggett([.96, 3, .2, .4], .026, 500, 7, 6);
 
-EarPlotGrid6 = linspace(-0.01, 1/beta-1, 20);
+EarPlotGrid6 = linspace(-0.01, .041, 20);
 for i=1:20
     graph6(i) = LSDemand(EarPlotGrid6(i), Value6, [.96, 3, .2, .4], 6);
     disp(i)
 end
 
+plot(graph3, EarPlotGrid3);
+hold on;
+plot(graph6, EarPlotGrid6);
+xline(0);
+yline(0);
+title('Graph 18.6.3')
+
 %Eq6 = LSEquilibrium([.96, 3, .2, .4], 500, 7, 6 );
+
+%% Figure 18.7.2 invariant distribution
+
+[Eq3] = LSEquilibrium([.96, 3, .2, .4], 500, 7, 3);
+
+[EqValue3, UtilityMatrix3, MarkovMatrix3, AssetGrid3] = LSHuggett(...
+    [.96, 3, .2, .4], 0, 100, 7, 3);
+[~, EqInd3] = PolicyHuggett(.96, EqValue3, AssetGrid3, 7, UtilityMatrix3, MarkovMatrix3);
+EqDist3 = InvariantDistribution(EqInd3, MarkovMatrix3);
+
+plot(AssetGrid3, sum(EqDist3, 2))
