@@ -1,4 +1,5 @@
-function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, r, AGridN, ZGridN, StartingGuess)
+function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = LSHuggett(...
+    param, r, AGridN, ZGridN, StartingGuess, bound)
     
     beta = param(1);
     gamma = param(2);
@@ -9,12 +10,12 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, 
 
     [ShockGrid, MarkovMatrix] = TauchenDiscretizer(ZGridN, 3, 0, rho, sigma);
     
-    phi = (exp(ShockGrid(1))/r); 
+    phi = bound; 
 
-    AssetGrid = linspace(-phi, phi, AGridN);
-    [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid', AssetGrid', exp(ShockGrid));
+    AssetGrid = linspace(-phi, 4*phi, AGridN);
+    [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid, AssetGrid, exp(ShockGrid));
 
-    UtilityMatrix = ((TFPGrid + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
+    UtilityMatrix = ((TFPGrid + (1+r).*AGrid - ANewGrid).^(1-gamma))./(1-gamma);
     UtilityMatrix(TFPGrid + (1+r).*AGrid - ANewGrid <=0 ) = -10^15;
 
     if ~exist('StartingGuess','var')
@@ -35,22 +36,12 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, 
     
     while error > tol
         if iter<50
-            for i=1:AGridN
-                for j=1:ZGridN
-                    PossibleNewValues = UtilityMatrix(:, i, j) + ...
-                        beta.*Value*MarkovMatrix(j,:)';
-                    NewValue(i,j) = max(PossibleNewValues,[],'all',"linear");
-                end
-            end
+            NewValue = reshape(max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1), AGridN, ZGridN);
         else
             if mod(iter,10)==0
-                for i=1:AGridN
-                    for j=1:ZGridN
-                        PossibleNewValues = UtilityMatrix(:, i, j) + ...
-                            beta.*Value*MarkovMatrix(j,:)';
-                        [NewValue(i,j), Index(i, j)]= max(PossibleNewValues,[],'all',"linear");
-                    end
-                end     
+                [NewValue, Index] = max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1);
+                NewValue = reshape(NewValue, AGridN, ZGridN);
+                Index = reshape(Index, AGridN, ZGridN);
             else
                 for i=1:AGridN
                     for j=1:ZGridN
@@ -61,6 +52,7 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = HowardHuggett(param, 
             end
         end
         error = max(abs(Value - NewValue),[],'all',"linear");
+        %disp(error);
         Value = NewValue;
         iter = iter+1;
     end

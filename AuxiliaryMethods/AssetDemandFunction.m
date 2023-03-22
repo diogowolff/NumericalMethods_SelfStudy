@@ -1,5 +1,4 @@
-function [AssetDemand, Distribution] = AssetDemandFunction(r, Value, Distribution)
-    param = [.96, 1.0001, .9, .01];
+function [AssetDemand, Distribution] = AssetDemandFunction(r, Value, param)
     AGridN = size(Value, 1);
     ZGridN = size(Value, 2);
     beta = param(1);
@@ -12,5 +11,3 @@ function [AssetDemand, Distribution] = AssetDemandFunction(r, Value, Distributio
 
     AssetDemand = sum(Policy.*Distribution, "all");
 end
-
-mu = (eye(size(TransitionMatrix, 1)) - TransitionMatrix + ones(size(TransitionMatrix)))\ones(size(TransitionMatrix), 1);

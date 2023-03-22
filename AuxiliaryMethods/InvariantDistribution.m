@@ -6,10 +6,10 @@ function [InitialGuess] = InvariantDistribution(PolicyIndex, MarkovMatrix)
     NextGuess = InitialGuess;
 
     error = 1;
-    tol = 10e-5;
+    tol = 10e-15;
     iter = 0;
 
-    while error >= tol
+    while error >= tol & iter < 1000
         for i=1:size(PolicyIndex,1)
             for j=1:size(PolicyIndex,2)
                 NextGuess(i,j) = sum(InitialGuess.*(PolicyIndex == i))*MarkovMatrix(:,j);

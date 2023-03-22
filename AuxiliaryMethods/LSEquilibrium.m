@@ -1,4 +1,4 @@
-function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
+function [r, Value, Policy] = LSEquilibrium(param, AGridN, ZGridN, bound)
     beta = param(1);
 
     RLowerBound = .0;
@@ -12,9 +12,9 @@ function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
         r = (RLowerBound + RUpperBound)/2;
         
         if iter>0
-            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(param, r, AGridN, ZGridN, Value);
+            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = LSHuggett(param, r, AGridN, ZGridN, Value, bound);
         else
-            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(param, r, AGridN, ZGridN);
+            [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = LSHuggett(param, r, AGridN, ZGridN, bound);
         end
 
         [Policy, Index] = PolicyHuggett(beta, Value, AssetGrid,ZGridN,UtilityMatrix,MarkovMatrix);
@@ -35,4 +35,3 @@ function [r, Value, Policy] = HuggettEquilibrium(param, AGridN, ZGridN)
     end
 
 end
-

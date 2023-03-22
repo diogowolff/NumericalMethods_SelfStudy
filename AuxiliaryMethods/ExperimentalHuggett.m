@@ -1,4 +1,5 @@
-function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(param, r, AGridN, ZGridN, StartingGuess)
+function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(...
+    param, r, AGridN, ZGridN, StartingGuess, phi)
     
     beta = param(1);
     gamma = param(2);
@@ -9,13 +10,13 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(p
 
     [ShockGrid, MarkovMatrix] = TauchenDiscretizer(ZGridN, 3, 0, rho, sigma);
     
-    phi = (exp(ShockGrid(1))/(1-beta)); 
+    phi = (exp(ShockGrid(1))/(1/beta - 1)); 
 
-    AssetGrid = linspace(-phi, phi, AGridN);
+    AssetGrid = linspace(-phi, 10*phi, AGridN);
     [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid, AssetGrid, exp(ShockGrid));
 
     UtilityMatrix = ((TFPGrid + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);
-    UtilityMatrix(TFPGrid + (1+r).*AGrid - ANewGrid <=0 ) = -inf;
+    UtilityMatrix(TFPGrid + (1+r).*AGrid - ANewGrid <=0 ) = -10^15;
 
     if ~exist('StartingGuess','var')
         Value = zeros(AGridN, ZGridN);
@@ -35,12 +36,12 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(p
     
     while error > tol
         if iter<50
-            NewValue = reshape(max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1), AGridN, 9);
+            NewValue = reshape(max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1), AGridN, ZGridN);
         else
             if mod(iter,10)==0
                 [NewValue, Index] = max(UtilityMatrix + permute(repmat(beta.*Value*MarkovMatrix',[1,1,AGridN]),[1,3,2]), [], 1);
-                NewValue = reshape(NewValue, AGridN, 9);
-                Index = reshape(Index, AGridN, 9);
+                NewValue = reshape(NewValue, AGridN, ZGridN);
+                Index = reshape(Index, AGridN, ZGridN);
             else
                 for i=1:AGridN
                     for j=1:ZGridN
@@ -51,6 +52,7 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(p
             end
         end
         error = max(abs(Value - NewValue),[],'all',"linear");
+        %disp(error);
         Value = NewValue;
         iter = iter+1;
     end
