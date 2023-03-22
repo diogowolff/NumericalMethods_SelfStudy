@@ -1,5 +1,5 @@
 function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(...
-    param, r, AGridN, ZGridN, StartingGuess, phi)
+    param, r, AGridN, ZGridN, StartingGuess)
     
     beta = param(1);
     gamma = param(2);
@@ -10,9 +10,9 @@ function [Value, UtilityMatrix, MarkovMatrix, AssetGrid] = ExperimentalHuggett(.
 
     [ShockGrid, MarkovMatrix] = TauchenDiscretizer(ZGridN, 3, 0, rho, sigma);
     
-    phi = (exp(ShockGrid(1))/(1/beta - 1)); 
+    phi = min((exp(ShockGrid(1))/(1/beta - 1)), abs(exp(ShockGrid(1))/r));  
 
-    AssetGrid = linspace(-phi, 10*phi, AGridN);
+    AssetGrid = linspace(-phi, 4*phi, AGridN);
     [AGrid, ANewGrid, TFPGrid] = meshgrid(AssetGrid, AssetGrid, exp(ShockGrid));
 
     UtilityMatrix = ((TFPGrid + (1+r).*AGrid - ANewGrid).^(1-gamma)-1)./(1-gamma);

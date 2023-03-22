@@ -6,7 +6,7 @@ function [InitialGuess] = InvariantDistribution(PolicyIndex, MarkovMatrix)
     NextGuess = InitialGuess;
 
     error = 1;
-    tol = 10e-15;
+    tol = 10e-10;
     iter = 0;
 
     while error >= tol & iter < 1000

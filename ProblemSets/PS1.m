@@ -40,11 +40,13 @@ nexttile
 plot(simulatedAR);
 hold on
 plot(tauchenSimulation);
+title('Tauchen discretization of AR process');
 
 nexttile
 plot(simulatedAR);
 hold on
 plot(rouwenhorstSimulation);
+title('Rouwenhorst discretization of AR process');
 
 %The discrete models seem to work fine.
 
